@@ -26,12 +26,13 @@ $ vim-profiler -h
 ```
 
 ```txt
-usage: vim-profiler.py [-h] [-o CSV] [-p] [-n N] [exe]
+usage: vim-profiler.py [-h] [-o CSV] [-p] [-n N] [cmd]
 
 Analyze startup times of vim/neovim plugins.
 
 positional arguments:
-  exe         vim or neovim executable
+  cmd         vim/neovim executable or command. If command options are given,
+              the full command should be quoted.
 
 optional arguments:
   -h, --help  show this help message and exit
@@ -47,6 +48,7 @@ $ vim-profiler.py nvim
 
 Running nvim to generate startup logs... done.
 Loading and processing logs... done.
+Plugin directory: /home/user/.config/nvim/plugged
 =====================================
 Top 10 plugins slowing nvim's startup
 =====================================

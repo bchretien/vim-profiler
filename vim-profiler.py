@@ -4,6 +4,7 @@
 from __future__ import print_function
 
 import os
+import sys
 import subprocess
 import re
 import csv
@@ -18,14 +19,18 @@ def clean_log(log_filename):
     if os.path.isfile(log_filename):
         os.remove(log_filename)
 
-def run_vim(exe, log_filename):
+def get_exe(cmd):
+    # FIXME: this assumes that the first word is the executable
+    return cmd.split(' ')[0]
+
+def run_vim(cmd, log_filename):
     """
     Run vim/nvim to generate startup logs.
     """
-    print("Running %s to generate startup logs..." % exe, end="")
+    print("Running %s to generate startup logs..." % get_exe(cmd), end="")
     clean_log(log_filename)
-    cmd = [exe, "--startuptime", log_filename, "-c", "q"]
-    subprocess.call(cmd, shell=False)
+    full_cmd = cmd.split(' ') + ["--startuptime", log_filename, "-c", "q"]
+    subprocess.call(full_cmd, shell=False)
     print(" done.")
 
 def guess_plugin_dir(log_txt):
@@ -36,24 +41,28 @@ def guess_plugin_dir(log_txt):
     user_dir = os.path.expanduser("~")
 
     # Get common plugin dir if any
-    matches = re.findall("^\d+.\d+\s+\d+.\d+\s+\d+.\d+: sourcing (.+?)/[^/]+/plugin/[^/]+", log_txt, re.MULTILINE)
+    vim_subdirs="autoload|ftdetect|plugin|syntax"
+    matches = re.findall("^\d+.\d+\s+\d+.\d+\s+\d+.\d+: sourcing (.+?)/(?:[^/]+/)(?:%s)/[^/]+" % vim_subdirs, log_txt, re.MULTILINE)
     for plugin_dir in matches:
         # Ignore system plugins
         if user_dir in plugin_dir:
             candidates.append(plugin_dir)
 
-    return collections.Counter(candidates).most_common(1)[0][0]
+    if candidates:
+        # FIXME: the directory containing vimrc could be returned as well
+        return collections.Counter(candidates).most_common(1)[0][0]
+    else:
+        raise RuntimeError("no plugin found")
 
-def load_data(exe, log_filename):
+def load_data(log_filename):
     """
     Load log and extract relevant data.
     """
     data = {}
 
     # Load log file and process it
+    print("Loading and processing logs...", end="")
     with open(log_filename, 'r') as log:
-        print("Loading and processing logs...", end="")
-
         log_txt = log.read()
 
         # Try to guess the folder based on the logs themselves
@@ -68,6 +77,8 @@ def load_data(exe, log_filename):
             else:
                 data[plugin] = float(time)
     print(" done.")
+
+    print("Plugin directory: %s" % plugin_dir)
 
     return data
 
@@ -123,21 +134,29 @@ def main():
                         help="Export result to a csv file")
     parser.add_argument("-p", dest="plot", action='store_true',
                         help="Plot result as a bar chart")
-    parser.add_argument(dest="exe", nargs='?', const=1, type=str, default="vim",
-                        help="vim or neovim executable")
+    parser.add_argument(dest="cmd", nargs='?', type=str, default="vim",
+                        help="vim/neovim executable or command. If command options \
+                        are given, the full command should be quoted.")
     parser.add_argument("-n", dest="n", type=int, default=10,
                         help="Number of plugins to list in the summary")
 
     # Parse CLI arguments
     args = parser.parse_args()
-    exe = args.exe
+    cmd = args.cmd
     log_filename = "vim.log"
     output_filename = args.csv
     n = args.n
 
+    # Executable
+    exe = get_exe(cmd)
+
     # Run analysis
-    run_vim(exe, log_filename)
-    data = load_data(exe, log_filename)
+    run_vim(cmd, log_filename)
+    try:
+        data = load_data(log_filename)
+    except RuntimeError as e:
+        print("\nNo plugin found. Exiting.")
+        sys.exit()
     if n > 0:
         print_summary(data, exe, n)
     if output_filename is not None:
