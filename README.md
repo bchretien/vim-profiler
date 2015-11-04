@@ -69,6 +69,16 @@ As for the plot (using Matplotlib):
 
 ![plot](https://raw.githubusercontent.com/bchretien/vim-profiler/master/.images/plot.png "Plot")
 
+You can also use a custom command (which should be in quotes):
+
+```txt
+$ vim-profiler.py "vim -u NONE"
+
+Running vim to generate startup logs... done.
+Loading and processing logs...
+No plugin found. Exiting.
+```
+
 ## License
 
 GPLv3
