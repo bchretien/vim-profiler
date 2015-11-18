@@ -106,10 +106,10 @@ Plugin directory: /home/user/.config/nvim/plugged
 Top 5 plugins slowing nvim's startup
 ====================================
 1       144.766 ultisnips
-2       95.977  YouCompleteMe
-3       11.408  vim-cpp-enhanced-highlight
-4       3.463   vim-fugitive
-5       2.992   tcomment_vim
+2        95.977 YouCompleteMe
+3        11.408 vim-cpp-enhanced-highlight
+4         3.463 vim-fugitive
+5         2.992 tcomment_vim
 ====================================
 ```
 
