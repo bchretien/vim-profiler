@@ -26,13 +26,12 @@ $ vim-profiler -h
 ```
 
 ```txt
-usage: vim-profiler.py [-h] [-o CSV] [-p] [-n N] [cmd]
+usage: vim-profiler.py [-h] [-o CSV] [-p] [-n N] ...
 
 Analyze startup times of vim/neovim plugins.
 
 positional arguments:
-  cmd         vim/neovim executable or command. If command options are given,
-              the full command should be quoted.
+  cmd         vim/neovim executable or command
 
 optional arguments:
   -h, --help  show this help message and exit
@@ -69,15 +68,53 @@ As for the plot (using Matplotlib):
 
 ![plot](https://raw.githubusercontent.com/bchretien/vim-profiler/master/.images/plot.png "Plot")
 
-You can also use a custom command (which should be in quotes):
+You can also use a custom command. Simply write it after the other options:
 
 ```txt
-$ vim-profiler.py "vim -u NONE"
+$ vim-profiler.py vim -u NONE
 
 Running vim to generate startup logs... done.
 Loading and processing logs...
 No plugin found. Exiting.
 ```
+
+This is particularly useful if you want to test your plugin manager's lazy
+loading feature:
+
+```txt
+$ vim-profiler.py -n 5 nvim foo.cc
+
+Running nvim to generate startup logs... done.
+Loading and processing logs... done.
+Plugin directory: /home/user/.config/nvim/plugged
+====================================
+Top 5 plugins slowing nvim's startup
+====================================
+1       5.613   vim-cpp-enhanced-highlight
+2       3.457   vim-fugitive
+3       2.864   tcomment_vim
+4       2.389   vim-hybrid
+5       1.870   lightline.vim
+====================================
+
+$ vim-profiler.py -n 5 nvim foo.cc -c ":exec ':normal ia' | :q\!"
+
+Running nvim to generate startup logs... done.
+Loading and processing logs... done.
+Plugin directory: /home/user/.config/nvim/plugged
+====================================
+Top 5 plugins slowing nvim's startup
+====================================
+1       144.766 ultisnips
+2       95.977  YouCompleteMe
+3       11.408  vim-cpp-enhanced-highlight
+4       3.463   vim-fugitive
+5       2.992   tcomment_vim
+====================================
+```
+
+Here `ultisnips` and `YouCompleteMe` were only loaded after entering insert
+mode.
 
 ## License
 

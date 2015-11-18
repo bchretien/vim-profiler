@@ -19,9 +19,14 @@ def clean_log(log_filename):
     if os.path.isfile(log_filename):
         os.remove(log_filename)
 
+def to_list(cmd):
+    if not isinstance(cmd, (list, tuple)):
+        cmd = cmd.split(' ')
+    return cmd
+
 def get_exe(cmd):
     # FIXME: this assumes that the first word is the executable
-    return cmd.split(' ')[0]
+    return to_list(cmd)[0]
 
 def run_vim(cmd, log_filename):
     """
@@ -29,7 +34,7 @@ def run_vim(cmd, log_filename):
     """
     print("Running %s to generate startup logs..." % get_exe(cmd), end="")
     clean_log(log_filename)
-    full_cmd = cmd.split(' ') + ["--startuptime", log_filename, "-c", "q"]
+    full_cmd = to_list(cmd) + ["--startuptime", log_filename, "-c", "q"]
     subprocess.call(full_cmd, shell=False)
     print(" done.")
 
@@ -134,9 +139,8 @@ def main():
                         help="Export result to a csv file")
     parser.add_argument("-p", dest="plot", action='store_true',
                         help="Plot result as a bar chart")
-    parser.add_argument(dest="cmd", nargs='?', type=str, default="vim",
-                        help="vim/neovim executable or command. If command options \
-                        are given, the full command should be quoted.")
+    parser.add_argument(dest="cmd", nargs=argparse.REMAINDER, type=str,
+                        help="vim/neovim executable or command")
     parser.add_argument("-n", dest="n", type=int, default=10,
                         help="Number of plugins to list in the summary")
 
@@ -147,7 +151,9 @@ def main():
     output_filename = args.csv
     n = args.n
 
-    # Executable
+    # Command (default = vim)
+    if cmd == []:
+        cmd = "vim"
     exe = get_exe(cmd)
 
     # Run analysis
