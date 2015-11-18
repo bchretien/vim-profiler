@@ -129,7 +129,7 @@ def print_summary(data, exe, n):
     rank = 0
     for name, time in sorted(data.items(), key=operator.itemgetter(1), reverse=True)[:n]:
         rank += 1
-        print("%i\t%7.3f\t%s" % (rank, time, name))
+        print("%i\t%7.3f   %s" % (rank, time, name))
 
     print(''.center(length, '='))
 

@@ -51,16 +51,16 @@ Plugin directory: /home/user/.config/nvim/plugged
 =====================================
 Top 10 plugins slowing nvim's startup
 =====================================
-1       4.559   vim-fugitive
-2       4.162   tcomment_vim
-3       3.936   vim-hybrid
-4       2.922   lightline.vim
-5       1.551   supertab
-6       1.522   vim-sneak
-7       1.100   ultisnips
-8       0.929   fzf.vim
-9       0.916   fzf
-10      0.877   vim-surround
+1         4.559   vim-fugitive
+2         4.162   tcomment_vim
+3         3.936   vim-hybrid
+4         2.922   lightline.vim
+5         1.551   supertab
+6         1.522   vim-sneak
+7         1.100   ultisnips
+8         0.929   fzf.vim
+9         0.916   fzf
+10        0.877   vim-surround
 =====================================
 ```
 
@@ -90,11 +90,11 @@ Plugin directory: /home/user/.config/nvim/plugged
 ====================================
 Top 5 plugins slowing nvim's startup
 ====================================
-1       5.613   vim-cpp-enhanced-highlight
-2       3.457   vim-fugitive
-3       2.864   tcomment_vim
-4       2.389   vim-hybrid
-5       1.870   lightline.vim
+1         5.613   vim-cpp-enhanced-highlight
+2         3.457   vim-fugitive
+3         2.864   tcomment_vim
+4         2.389   vim-hybrid
+5         1.870   lightline.vim
 ====================================
 
 $ vim-profiler.py -n 5 nvim foo.cc -c ":exec ':normal ia' | :q\!"
@@ -105,11 +105,11 @@ Plugin directory: /home/user/.config/nvim/plugged
 ====================================
 Top 5 plugins slowing nvim's startup
 ====================================
-1       144.766 ultisnips
-2        95.977 YouCompleteMe
-3        11.408 vim-cpp-enhanced-highlight
-4         3.463 vim-fugitive
-5         2.992 tcomment_vim
+1       144.766   ultisnips
+2        95.977   YouCompleteMe
+3        11.408   vim-cpp-enhanced-highlight
+4         3.463   vim-fugitive
+5         2.992   tcomment_vim
 ====================================
 ```
 
