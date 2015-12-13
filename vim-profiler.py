@@ -168,8 +168,11 @@ class StartupAnalyzer(object):
         print("Plotting result...", end="")
         avg_data = self.average_data()
         avg_data = sorted(avg_data.items(), key=operator.itemgetter(1), reverse=False)
-        err = self.stdev_data()
-        sorted_err = [err[k] for k in list(zip(*avg_data))[0]]
+        if len(self.raw_data) > 1:
+            err = self.stdev_data()
+            sorted_err = [err[k] for k in list(zip(*avg_data))[0]]
+        else:
+            sorted_err = None
         pylab.barh(range(len(avg_data)), list(zip(*avg_data))[1], xerr=sorted_err,
                    align='center', alpha=0.4)
         pylab.yticks(range(len(avg_data)), list(zip(*avg_data))[0])
