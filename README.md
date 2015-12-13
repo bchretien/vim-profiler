@@ -28,7 +28,7 @@ $ vim-profiler -h
 ```
 
 ```txt
-usage: vim-profiler.py [-h] [-o CSV] [-p] [-n N] ...
+usage: vim-profiler.py [-h] [-o CSV] [-p] [-n N] [-r RUNS] ...
 
 Analyze startup times of vim/neovim plugins.
 
@@ -40,6 +40,7 @@ optional arguments:
   -o CSV      Export result to a csv file
   -p          Plot result as a bar chart
   -n N        Number of plugins to list in the summary
+  -r RUNS     Number of runs (for average/standard deviation)
 ```
 
 The text summary looks like this:
@@ -67,6 +68,24 @@ Top 10 plugins slowing nvim's startup
 ```
 
 As for the plot (using Matplotlib):
+
+```
+$ vim-profiler.py -p -r 10 nvim
+=====================================
+Top 10 plugins slowing nvim's startup
+=====================================
+1         3.326   vim-fugitive
+2         2.936   tcomment_vim
+3         2.315   vim-hybrid
+4         1.751   lightline.vim
+5         0.959   vim-sneak
+6         0.943   supertab
+7         0.542   vim-surround
+8         0.536   fzf.vim
+9         0.450   fzf
+10        0.434   auto-pairs
+=====================================
+```
 
 ![plot](https://raw.githubusercontent.com/bchretien/vim-profiler/master/.images/plot.png "Plot")
 
