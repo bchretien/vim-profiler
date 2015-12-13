@@ -169,10 +169,10 @@ class StartupAnalyzer(object):
         avg_data = self.average_data()
         avg_data = sorted(avg_data.items(), key=operator.itemgetter(1), reverse=False)
         err = self.stdev_data()
-        sorted_err = [err[k] for k in zip(*avg_data)[0]]
-        pylab.barh(range(len(avg_data)), zip(*avg_data)[1], xerr=sorted_err,
+        sorted_err = [err[k] for k in list(zip(*avg_data))[0]]
+        pylab.barh(range(len(avg_data)), list(zip(*avg_data))[1], xerr=sorted_err,
                    align='center', alpha=0.4)
-        pylab.yticks(range(len(avg_data)), zip(*avg_data)[0])
+        pylab.yticks(range(len(avg_data)), list(zip(*avg_data))[0])
         pylab.xlabel("Average startup time (ms)")
         pylab.ylabel("Plugins")
         pylab.show()
