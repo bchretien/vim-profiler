@@ -24,3 +24,4 @@ script:
   - ./vim-profiler.py vim -u NONE
   - ./vim-profiler.py vim -u .travis/vimrc
   - ./vim-profiler.py -n 5 vim -u .travis/vimrc
+  - ./vim-profiler.py -n 5 -r 10 vim -u .travis/vimrc
