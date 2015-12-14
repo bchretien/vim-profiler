@@ -160,9 +160,6 @@ class StartupAnalyzer(object):
         """
         Plot startup data.
         """
-        import matplotlib
-        # TODO: do not force matplotlib backend
-        matplotlib.use('Qt5Agg')
         import pylab
 
         print("Plotting result...", end="")
