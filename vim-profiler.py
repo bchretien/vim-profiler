@@ -12,14 +12,17 @@ import operator
 import argparse
 import collections
 
+
 def to_list(cmd):
     if not isinstance(cmd, (list, tuple)):
         cmd = cmd.split(' ')
     return cmd
 
+
 def get_exe(cmd):
     # FIXME: this assumes that the first word is the executable
     return to_list(cmd)[0]
+
 
 def stdev(arr):
     """
@@ -35,6 +38,7 @@ def stdev(arr):
             return numpy.std(arr, axis=0)
         except ImportError:
             return 0.
+
 
 class StartupData(object):
     """
@@ -54,11 +58,12 @@ class StartupData(object):
         self.__run_vim()
         try:
             self.__load_times()
-        except RuntimeError as e:
+        except RuntimeError:
             print("\nNo plugin found. Exiting.")
             sys.exit()
 
-    def __guess_plugin_dir(self, log_txt):
+    @staticmethod
+    def __guess_plugin_dir(log_txt):
         """
         Try to guess the vim directory containing plugins.
         """
@@ -66,8 +71,10 @@ class StartupData(object):
         user_dir = os.path.expanduser("~")
 
         # Get common plugin dir if any
-        vim_subdirs="autoload|ftdetect|plugin|syntax"
-        matches = re.findall("^\d+.\d+\s+\d+.\d+\s+\d+.\d+: sourcing (.+?)/(?:[^/]+/)(?:%s)/[^/]+" % vim_subdirs, log_txt, re.MULTILINE)
+        vim_subdirs = "autoload|ftdetect|plugin|syntax"
+        matches = re.findall("^\d+.\d+\s+\d+.\d+\s+\d+.\d+: "
+                             "sourcing (.+?)/(?:[^/]+/)(?:%s)/[^/]+"
+                             % vim_subdirs, log_txt, re.MULTILINE)
         for plugin_dir in matches:
             # Ignore system plugins
             if user_dir in plugin_dir:
@@ -91,7 +98,9 @@ class StartupData(object):
             # Try to guess the folder based on the logs themselves
             plugin_dir = self.__guess_plugin_dir(log_txt)
 
-            matches = re.findall("^\d+.\d+\s+\d+.\d+\s+(\d+.\d+): sourcing %s/([^/]+)/" % plugin_dir, log_txt, re.MULTILINE)
+            matches = re.findall("^\d+.\d+\s+\d+.\d+\s+(\d+.\d+): "
+                                 "sourcing %s/([^/]+)/" % plugin_dir,
+                                 log_txt, re.MULTILINE)
             for res in matches:
                 time = res[0]
                 plugin = res[1]
@@ -106,9 +115,11 @@ class StartupData(object):
         """
         Run vim/nvim to generate startup logs.
         """
-        print("Running %s to generate startup logs..." % get_exe(self.cmd), end="")
+        print("Running %s to generate startup logs..." % get_exe(self.cmd),
+              end="")
         self.__clean_log()
-        full_cmd = to_list(self.cmd) + ["--startuptime", self.log_filename, "-c", "q"]
+        full_cmd = to_list(self.cmd) + ["--startuptime", self.log_filename,
+                                        "-c", "q"]
         subprocess.call(full_cmd, shell=False)
         print(" done.")
 
@@ -142,19 +153,20 @@ class StartupAnalyzer(object):
         """
         Merge startup times for each plugin.
         """
-        return {k: [d.times[k] for d in self.raw_data] for k in self.raw_data[0].times.keys()}
+        return {k: [d.times[k] for d in self.raw_data]
+                for k in self.raw_data[0].times.keys()}
 
     def average_data(self):
         """
         Return average times for each plugin.
         """
-        return {k: sum(v)/len(v) for k,v in self.data.items()}
+        return {k: sum(v)/len(v) for k, v in self.data.items()}
 
     def stdev_data(self):
         """
         Return standard deviation for each plugin.
         """
-        return {k: stdev(v) for k,v in self.data.items()}
+        return {k: stdev(v) for k, v in self.data.items()}
 
     def plot(self):
         """
@@ -164,14 +176,14 @@ class StartupAnalyzer(object):
 
         print("Plotting result...", end="")
         avg_data = self.average_data()
-        avg_data = sorted(avg_data.items(), key=operator.itemgetter(1), reverse=False)
+        avg_data = self.__sort_data(avg_data, False)
         if len(self.raw_data) > 1:
             err = self.stdev_data()
             sorted_err = [err[k] for k in list(zip(*avg_data))[0]]
         else:
             sorted_err = None
-        pylab.barh(range(len(avg_data)), list(zip(*avg_data))[1], xerr=sorted_err,
-                   align='center', alpha=0.4)
+        pylab.barh(range(len(avg_data)), list(zip(*avg_data))[1],
+                   xerr=sorted_err, align='center', alpha=0.4)
         pylab.yticks(range(len(avg_data)), list(zip(*avg_data))[0])
         pylab.xlabel("Average startup time (ms)")
         pylab.ylabel("Plugins")
@@ -189,7 +201,7 @@ class StartupAnalyzer(object):
             # Compute average times
             avg_data = self.average_data()
             # Sort by average time
-            for name, avg_time in sorted(avg_data.items(), key=operator.itemgetter(1), reverse=True):
+            for name, avg_time in self.__sort_data(avg_data):
                 writer.writerow(["%.3f" % avg_time, name])
         print(" done.")
 
@@ -207,14 +219,23 @@ class StartupAnalyzer(object):
         avg_data = self.average_data()
         # Sort by average time
         rank = 0
-        for name, time in sorted(avg_data.items(), key=operator.itemgetter(1), reverse=True)[:n]:
+        for name, time in self.__sort_data(avg_data)[:n]:
             rank += 1
             print("%i\t%7.3f   %s" % (rank, time, name))
 
         print(''.center(length, '='))
 
+    @staticmethod
+    def __sort_data(d, reverse=True):
+        """
+        Sort data by decreasing time.
+        """
+        return sorted(d.items(), key=operator.itemgetter(1), reverse=reverse)
+
+
 def main():
-    parser = argparse.ArgumentParser(description='Analyze startup times of vim/neovim plugins.')
+    parser = argparse.ArgumentParser(
+            description='Analyze startup times of vim/neovim plugins.')
     parser.add_argument("-o", dest="csv", type=str,
                         help="Export result to a csv file")
     parser.add_argument("-p", dest="plot", action='store_true',
