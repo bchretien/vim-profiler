@@ -7,7 +7,14 @@ Utility script to profile (n)vim (e.g. startup). For now, only startup time
 w.r.t. plugins is analyzed. The plugin directory is automatically found.
 
 The script is inspired from [vim-plugins-profile][vim-plugins-profile], but
-only depends on Python.
+only depends on Python. It supports the following features:
+
+- run any vim/neovim command,
+- detect the plugin directory automatically,
+- handle GUI versions,
+- compute the average time/standard deviation over multiple runs,
+- export the result to a CSV file,
+- plot a bar chart.
 
 ## Dependencies
 
