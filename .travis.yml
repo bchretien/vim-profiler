@@ -21,6 +21,7 @@ install:
   - vim -u .travis/vimrc +PlugInstall +qall
 
 script:
+  - vim --version
   - ./vim-profiler.py vim -u NONE
   - ./vim-profiler.py vim -u .travis/vimrc
   - ./vim-profiler.py -n 5 vim -u .travis/vimrc
