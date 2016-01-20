@@ -146,7 +146,7 @@ class StartupData(object):
               end="")
         self.__clean_log()
         full_cmd = to_list(self.cmd) + ["--startuptime", self.log_filename,
-                                        "-c", "q"]
+                                        "-f", "-c", "q"]
         subprocess.call(full_cmd, shell=False)
         print(" done.")
 
