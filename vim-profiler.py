@@ -40,6 +40,17 @@ def get_exe(cmd):
     return to_list(cmd)[0]
 
 
+def is_subdir(paths, subdir):
+    # See: http://stackoverflow.com/a/18115684/1043187
+    for path in paths:
+        path = os.path.realpath(path)
+        subdir = os.path.realpath(subdir)
+        reldir = os.path.relpath(subdir, path)
+        if not (reldir == os.pardir or reldir.startswith(os.pardir + os.sep)):
+            return True
+    return False
+
+
 def stdev(arr):
     """
     Compute the standard deviation.
@@ -84,7 +95,7 @@ class StartupData(object):
         Try to guess the vim directory containing plugins.
         """
         candidates = list()
-        user_dir = os.path.expanduser("~")
+        system_dirs = ["/usr", "/usr/local"]
 
         # Get common plugin dir if any
         vim_subdirs = "autoload|ftdetect|plugin|syntax"
@@ -93,7 +104,7 @@ class StartupData(object):
                              % vim_subdirs, log_txt, re.MULTILINE)
         for plugin_dir in matches:
             # Ignore system plugins
-            if user_dir in plugin_dir:
+            if not is_subdir(system_dirs, plugin_dir):
                 candidates.append(plugin_dir)
 
         if candidates:
