@@ -31,7 +31,7 @@ Optional:
 
 To list the available options:
 ```sh
-$ vim-profiler -h
+$ vim-profiler.py -h
 ```
 
 ```txt
