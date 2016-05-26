@@ -35,7 +35,7 @@ $ vim-profiler.py -h
 ```
 
 ```txt
-usage: vim-profiler.py [-h] [-o CSV] [-p] [-n N] [-r RUNS] ...
+usage: vim-profiler.py [-h] [-o CSV] [-p] [-s] [-n N] [-r RUNS] ...
 
 Analyze startup times of vim/neovim plugins.
 
@@ -46,6 +46,7 @@ optional arguments:
   -h, --help  show this help message and exit
   -o CSV      Export result to a csv file
   -p          Plot result as a bar chart
+  -s          Consider system plugins as well (marked with *)
   -n N        Number of plugins to list in the summary
   -r RUNS     Number of runs (for average/standard deviation)
 ```

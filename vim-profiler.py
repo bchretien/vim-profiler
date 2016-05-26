@@ -71,31 +71,30 @@ class StartupData(object):
     """
     Data for (n)vim startup (timings etc.).
     """
-    def __init__(self, cmd, log_filename):
+    def __init__(self, cmd, log_filename, check_system=False):
         super(StartupData, self).__init__()
         self.cmd = cmd
         self.log_filename = log_filename
         self.times = dict()
-        self.generate()
+        self.system_dirs = ["/usr", "/usr/local"]
+        self.generate(check_system)
 
-    def generate(self):
+    def generate(self, check_system=False):
         """
         Generate startup data.
         """
         self.__run_vim()
         try:
-            self.__load_times()
+            self.__load_times(check_system)
         except RuntimeError:
             print("\nNo plugin found. Exiting.")
             sys.exit()
 
-    @staticmethod
-    def __guess_plugin_dir(log_txt):
+    def __guess_plugin_dir(self, log_txt):
         """
         Try to guess the vim directory containing plugins.
         """
         candidates = list()
-        system_dirs = ["/usr", "/usr/local"]
 
         # Get common plugin dir if any
         vim_subdirs = "autoload|ftdetect|plugin|syntax"
@@ -104,7 +103,7 @@ class StartupData(object):
                              % vim_subdirs, log_txt, re.MULTILINE)
         for plugin_dir in matches:
             # Ignore system plugins
-            if not is_subdir(system_dirs, plugin_dir):
+            if not is_subdir(self.system_dirs, plugin_dir):
                 candidates.append(plugin_dir)
 
         if candidates:
@@ -113,7 +112,7 @@ class StartupData(object):
         else:
             raise RuntimeError("no plugin found")
 
-    def __load_times(self):
+    def __load_times(self, check_system=False):
         """
         Load startup times for log file.
         """
@@ -135,6 +134,20 @@ class StartupData(object):
                     self.times[plugin] += float(time)
                 else:
                     self.times[plugin] = float(time)
+
+            if check_system:
+                for d in self.system_dirs:
+                    matches = re.findall("^\d+.\d+\s+\d+.\d+\s+(\d+.\d+): "
+                                         "sourcing %s/.+/([^/]+.vim)" % d,
+                                         log_txt, re.MULTILINE)
+                    for res in matches:
+                        time = res[0]
+                        plugin = "*%s" % res[1]
+                        if plugin in self.times:
+                            self.times[plugin] += float(time)
+                        else:
+                            self.times[plugin] = float(time)
+
         print(" done.")
         print("Plugin directory: %s" % plugin_dir)
 
@@ -172,7 +185,8 @@ class StartupAnalyzer(object):
         super(StartupAnalyzer, self).__init__()
         self.runs = param.runs
         self.cmd = param.cmd
-        self.raw_data = [StartupData(self.cmd, "vim_%i.log" % (i+1))
+        self.raw_data = [StartupData(self.cmd, "vim_%i.log" % (i+1),
+                                     check_system=param.check_system)
                          for i in range(self.runs)]
         self.data = self.process_data()
 
@@ -267,6 +281,8 @@ def main():
                         help="Export result to a csv file")
     parser.add_argument("-p", dest="plot", action='store_true',
                         help="Plot result as a bar chart")
+    parser.add_argument("-s", dest="check_system", action='store_true',
+                        help="Consider system plugins as well (marked with *)")
     parser.add_argument("-n", dest="n", type=int, default=10,
                         help="Number of plugins to list in the summary")
     parser.add_argument("-r", dest="runs", type=int, default=1,
