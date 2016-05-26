@@ -90,6 +90,9 @@ class StartupData(object):
             print("\nNo plugin found. Exiting.")
             sys.exit()
 
+        if not self.times:
+            sys.exit()
+
     def __guess_plugin_dir(self, log_txt):
         """
         Try to guess the vim directory containing plugins.
@@ -110,7 +113,7 @@ class StartupData(object):
             # FIXME: the directory containing vimrc could be returned as well
             return collections.Counter(candidates).most_common(1)[0][0]
         else:
-            raise RuntimeError("no plugin found")
+            raise RuntimeError("no user plugin found")
 
     def __load_times(self, check_system=False):
         """
@@ -120,25 +123,32 @@ class StartupData(object):
         print("Loading and processing logs...", end="")
         with open(self.log_filename, 'r') as log:
             log_txt = log.read()
+            plugin_dir = ""
 
             # Try to guess the folder based on the logs themselves
-            plugin_dir = self.__guess_plugin_dir(log_txt)
-
-            matches = re.findall("^\d+.\d+\s+\d+.\d+\s+(\d+.\d+): "
-                                 "sourcing %s/([^/]+)/" % plugin_dir,
-                                 log_txt, re.MULTILINE)
-            for res in matches:
-                time = res[0]
-                plugin = res[1]
-                if plugin in self.times:
-                    self.times[plugin] += float(time)
+            try:
+                plugin_dir = self.__guess_plugin_dir(log_txt)
+                matches = re.findall("^\d+.\d+\s+\d+.\d+\s+(\d+.\d+): "
+                                     "sourcing %s/([^/]+)/" % plugin_dir,
+                                     log_txt, re.MULTILINE)
+                for res in matches:
+                    time = res[0]
+                    plugin = res[1]
+                    if plugin in self.times:
+                        self.times[plugin] += float(time)
+                    else:
+                        self.times[plugin] = float(time)
+            # Catch exception if no plugin was found
+            except RuntimeError as e:
+                if not check_system:
+                    raise
                 else:
-                    self.times[plugin] = float(time)
+                    plugin_dir = ""
 
             if check_system:
                 for d in self.system_dirs:
                     matches = re.findall("^\d+.\d+\s+\d+.\d+\s+(\d+.\d+): "
-                                         "sourcing %s/.+/([^/]+.vim)" % d,
+                                         "sourcing %s/.+/([^/]+.vim)\n" % d,
                                          log_txt, re.MULTILINE)
                     for res in matches:
                         time = res[0]
@@ -149,7 +159,12 @@ class StartupData(object):
                             self.times[plugin] = float(time)
 
         print(" done.")
-        print("Plugin directory: %s" % plugin_dir)
+        if plugin_dir:
+            print("Plugin directory: %s" % plugin_dir)
+        else:
+            print("No user plugin found.")
+        if not self.times:
+            print("No system plugin found.")
 
     def __run_vim(self):
         """
