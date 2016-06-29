@@ -1,7 +1,7 @@
 vim-profiler
 ============
 
-[![Build Status](https://travis-ci.org/bchretien/vim-profiler.png?branch=master)](https://travis-ci.org/bchretien/vim-profiler)
+[![Build Status](https://travis-ci.org/bchretien/vim-profiler.svg?branch=master)](https://travis-ci.org/bchretien/vim-profiler)
 
 Utility script to profile (n)vim (e.g. startup). For now, only startup time
 w.r.t. plugins is analyzed. The plugin directory is automatically found.
